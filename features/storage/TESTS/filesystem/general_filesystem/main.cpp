@@ -26,6 +26,9 @@
 #elif COMPONENT_SD
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
+#elif COMPONENT_SDIO
+#include "SDBIOlockDevice.h"
+#include "FATFileSystem.h"
 #else
 #error [NOT_SUPPORTED] storage test not supported on this platform
 #endif

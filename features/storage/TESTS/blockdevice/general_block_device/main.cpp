@@ -44,6 +44,10 @@
 #include "SDBlockDevice.h"
 #endif
 
+#if COMPONENT_SDIO
+#include "SDIOBlockDevice.h"
+#endif
+
 #if COMPONENT_FLASHIAP
 #include "FlashIAPBlockDevice.h"
 #endif
@@ -84,11 +88,12 @@ enum bd_type {
     qspif,
     dataflash,
     sd,
+    sdio,
     flashiap,
     default_bd
 };
 
-uint8_t bd_arr[5] = {0};
+uint8_t bd_arr[6] = {0};
 
 static uint8_t test_iteration = 0;
 
@@ -155,6 +160,13 @@ static BlockDevice *get_bd_instance(uint8_t bd_type)
                 MBED_CONF_SD_SPI_CLK,
                 MBED_CONF_SD_SPI_CS
             );
+            return &default_bd;
+#endif
+            break;
+        }
+        case sdio: {
+#if COMPONENT_SDIO
+            static SDIOBlockDevice default_bd(MBED_CONF_SDIO_CD);
             return &default_bd;
 #endif
             break;
@@ -707,6 +719,8 @@ void test_get_type_functionality()
     TEST_ASSERT_EQUAL(0, strcmp(bd_type, "DATAFLASH"));
 #elif COMPONENT_SD
     TEST_ASSERT_EQUAL(0, strcmp(bd_type, "SD"));
+#elif COMPONENT_SDIO
+    TEST_ASSERT_EQUAL(0, strcmp(bd_type, "SDIO"));
 #elif COMPONET_FLASHIAP
     TEST_ASSERT_EQUAL(0, strcmp(bd_type, "FLASHIAP"));
 #endif
@@ -758,14 +772,17 @@ int get_bd_count()
 #if COMPONENT_SD
     bd_arr[count++] = sd;             //3
 #endif
+#if COMPONENT_SDIO
+    bd_arr[count++] = sdio;           //4
+#endif
 #if COMPONENT_FLASHIAP
-    bd_arr[count++] = flashiap;       //4
+    bd_arr[count++] = flashiap;       //5
 #endif
 
     return count;
 }
 
-static const char *prefix[] = {"SPIF ", "QSPIF ", "DATAFLASH ", "SD ", "FLASHIAP ", "DEFAULT "};
+static const char *prefix[] = {"SPIF ", "QSPIF ", "DATAFLASH ", "SD ", "SDIO", "FLASHIAP ", "DEFAULT "};
 
 int main()
 {
